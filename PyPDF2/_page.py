@@ -666,7 +666,7 @@ class PageObject(DictionaryObject):
         deprecation_with_replacement("getContents", "get_contents", "3.0.0")
         return self.get_contents()
 
-    def merge_page(self, page2: "PageObject", expand: bool = False) -> None:
+    def merge_page(self, page2: "PageObject", expand: bool = False, content_overwrite: bool = False) -> None:
         """
         Merge the content streams of two pages into one.
 
@@ -681,8 +681,10 @@ class PageObject(DictionaryObject):
                 an instance of :class:`PageObject<PageObject>`.
             expand: If true, the current page dimensions will be
                 expanded to accommodate the dimensions of the page to be merged.
+	    content_overwrite: If true, the current page content will be
+            overwritten by the content of the page to be merged.
         """
-        self._merge_page(page2, expand=expand)
+        self._merge_page(page2, expand=expand, content_overwrite=content_overwrite)
 
     def mergePage(self, page2: "PageObject") -> None:  # pragma: no cover
         """
@@ -698,7 +700,7 @@ class PageObject(DictionaryObject):
         page2: "PageObject",
         page2transformation: Optional[Callable[[Any], ContentStream]] = None,
         ctm: Optional[CompressedTransformationMatrix] = None,
-        expand: bool = False,
+        expand: bool = False, content_overwrite: bool = False,
     ) -> None:
         # First we work on merging the resource dictionaries.  This allows us
         # to find out what symbols in the content streams we might need to
@@ -751,7 +753,7 @@ class PageObject(DictionaryObject):
         new_content_array = ArrayObject()
 
         original_content = self.get_contents()
-        if original_content is not None:
+        if original_content is not None and not content_overwrite:
             new_content_array.append(
                 PageObject._push_pop_gs(original_content, self.pdf)
             )
